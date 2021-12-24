@@ -6,7 +6,7 @@
  *  first person to reach a particular score wins
  */
 
-var scores, roundScore, activePlayer, gamePlaying;
+var scores, roundScore, activePlayer, gamePlaying, prev;
 
 init();
 
@@ -19,23 +19,33 @@ var diceDOM = document.querySelector(".dice");
 document.querySelector(".btn--roll").addEventListener('click', function() {
     if (gamePlaying) {
       // 1. Random number is needed
-      var dice = Math.floor(Math.random() * 6) + 1;
+      var dice1 = Math.floor(Math.random() * 6) + 1;
+      var dice2 = Math.floor(Math.random() * 6) + 1;
       document.querySelector("#current--" + activePlayer).textContent = dice;
 
       // 2. display results
-      diceDOM.style.display = "block";
-      diceDOM.src = "/images/dice-" + dice + ".png";
+      document.getElementById('dice-1').style.display = "block";
+      document.getElementById("dice-2").style.display = "block";
+      document.getElementById("dice-1").src = "/images/dice-" + dice1 + ".png";
+      document.getElementById("dice-2").src = "/images/dice-" + dice2 + ".png";
 
       //3. Update round only if rolled number is not 1
       if (dice !== 1) {
         // add score
         roundScore += dice;
-        document.querySelector("#current--" + activePlayer).textContent =
-          roundScore;
+        document.querySelector("#current--" + activePlayer).textContent = roundScore;
+        
+        if (prev === 6 && dice === 6) {
+            scores[activePlayer] = 0;
+            document.querySelector("#current--" + activePlayer).textContent = 0;
+            document.querySelector("#score--" + activePlayer).textContent = 0;
+            nextPlayer();
+        }
       } else {
         // change players
         nextPlayer();
       }
+      prev = dice;
     }
 });
 
@@ -49,8 +59,16 @@ document.querySelector(".btn--hold").addEventListener('click', function() {
         scores[activePlayer];
       // change players
 
+      var input = document.querySelector('.final-score').value;
       // check if player won the game
-      if (scores[activePlayer] >= 20) {
+      var winning_score; 
+      if (input) {
+          winning_score = input;
+      } else {
+          winning_score = 100;
+      }
+
+      if (scores[activePlayer] >= winning_score) {
         document.getElementById("name--" + activePlayer).textContent = "Winner";
         diceDOM.style.display = "none";
 
@@ -61,7 +79,7 @@ document.querySelector(".btn--hold").addEventListener('click', function() {
           .querySelector(".player--" + activePlayer)
           .classList.add("player--winner");
         gamePlaying = false;
-        
+
       } else {
         nextPlayer();
       }
